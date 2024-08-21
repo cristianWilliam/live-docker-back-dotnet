@@ -1,0 +1,45 @@
+﻿services:
+  
+  db-postgres:
+    image: postgres:16.4
+    ports:
+      - 5432:5432
+    environment:
+      - "POSTGRES_PASSWORD=123"
+    networks:
+      - live-network
+    volumes:
+      - live-volume:/var/lib/postgresql/data
+    
+  
+  back-dotnet:
+    image: back-dotnet
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - live-network
+    depends_on:
+      - db-postgres
+    restart: always
+    
+  live-front:
+    image: live-front
+    build:
+      context: ../front-angular
+      dockerfile: Dockerfile
+    ports:
+      - 4400:82
+    networks:
+      - live-network
+    depends_on:
+      - back-dotnet
+
+networks:
+  live-network:
+    driver: bridge
+
+volumes:
+  live-volume:
